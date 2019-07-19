@@ -23,6 +23,8 @@ public class Percolation {
         int counter = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
+                if (counter == 10)
+                    counter = 0;
                 matrixValues[i][j] = counter++;
             }
         }
@@ -37,14 +39,14 @@ public class Percolation {
     }
 
     public void open(int row, int column) {
-        matrixOpenings[row][column] = true;
         row -= 1;
         column -= 1;
+        matrixOpenings[row][column] = true;
         if (row + 1 < size && matrixOpenings[row + 1][column]) {
             matrix.union(matrixValues[row][column], matrixValues[row + 1][column]);
         }
         if (row - 1 > 0 && matrixOpenings[row - 1][column]) {
-            matrix.union(matrixValues[row][column], matrixValues[row + 1][column]);
+            matrix.union(matrixValues[row][column], matrixValues[row - 1][column]);
         }
         if (column + 1 < size && matrixOpenings[row][column + 1]) {
             matrix.union(matrixValues[row][column], matrixValues[row][column + 1]);
@@ -59,7 +61,7 @@ public class Percolation {
         row -= 1;
         column -= 1;
         while (columnNumber < size) {
-            if (columnNumber != column && matrix.connected(matrixValues[row][column], matrixValues[0][columnNumber])) {
+            if (columnNumber != column && matrixOpenings[row][column] && matrixOpenings[0][columnNumber] && matrix.connected(matrixValues[row][column], matrixValues[0][columnNumber])) {
                 return true;
             }
             columnNumber += 1;
@@ -76,6 +78,14 @@ public class Percolation {
     }
 
     public boolean percolates() {
+        boolean percolates = false;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (matrixOpenings[size - 1][j] && matrixOpenings[0][j] && matrix.connected(matrixValues[size - 1][j], matrixValues[0][j])) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 }
