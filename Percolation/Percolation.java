@@ -17,14 +17,12 @@ public class Percolation {
             throw new IllegalArgumentException("Size should be larger than 0. Current size is: "+ size);
         }
         this.size = size;
-        matrix = new WeightedQuickUnionUF(size);
+        matrix = new WeightedQuickUnionUF(size*size);
         matrixValues = new int[size][size];
         matrixOpenings = new boolean[size][size];
         int counter = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (counter == 10)
-                    counter = 0;
                 matrixValues[i][j] = counter++;
             }
         }
@@ -45,13 +43,13 @@ public class Percolation {
         if (row + 1 < size && matrixOpenings[row + 1][column]) {
             matrix.union(matrixValues[row][column], matrixValues[row + 1][column]);
         }
-        if (row - 1 > 0 && matrixOpenings[row - 1][column]) {
+        if (row - 1 >= 0 && matrixOpenings[row - 1][column]) {
             matrix.union(matrixValues[row][column], matrixValues[row - 1][column]);
         }
         if (column + 1 < size && matrixOpenings[row][column + 1]) {
             matrix.union(matrixValues[row][column], matrixValues[row][column + 1]);
         }
-        if (column - 1 > 0 && matrixOpenings[row][column - 1]) {
+        if (column - 1 >= 0 && matrixOpenings[row][column - 1]) {
             matrix.union(matrixValues[row][column], matrixValues[row][column - 1]);
         }
     }
@@ -60,8 +58,11 @@ public class Percolation {
         int columnNumber = 0;
         row -= 1;
         column -= 1;
+        if (row == 0 && matrixOpenings[row][column]) {
+            return true;
+        }
         while (columnNumber < size) {
-            if (columnNumber != column && matrixOpenings[row][column] && matrixOpenings[0][columnNumber] && matrix.connected(matrixValues[row][column], matrixValues[0][columnNumber])) {
+            if (matrixOpenings[row][column] && matrixOpenings[0][columnNumber] && matrix.connected(matrixValues[row][column], matrixValues[0][columnNumber])) {
                 return true;
             }
             columnNumber += 1;
@@ -81,7 +82,7 @@ public class Percolation {
         boolean percolates = false;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (matrixOpenings[size - 1][j] && matrixOpenings[0][j] && matrix.connected(matrixValues[size - 1][j], matrixValues[0][j])) {
+                if (matrixOpenings[size - 1][i] && matrixOpenings[0][j] && matrix.connected(matrixValues[size - 1][i], matrixValues[0][j])) {
                     return true;
                 }
             }
