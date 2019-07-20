@@ -4,13 +4,12 @@
  *  Description:
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdRandom;
 
 public class PercolationStats {
-    private int numberOfTrials = 100;
-    private double[] meanStats = new double[numberOfTrials];
+    private int numberOfTrials;
+    private double[] meanStats;
     private int meanIndex = 0;
 
 
@@ -20,18 +19,13 @@ public class PercolationStats {
             throw new IllegalArgumentException("Trial or size value must be larger than 0");
         }
         numberOfTrials = trials;
-        StdDraw.enableDoubleBuffering();
-        StdDraw.show();
+        meanStats = new double[numberOfTrials];
         for (int i = 0; i < trials; i++) {
-            int trialForUser = i + 1;
-            System.out.println("Trial " + trialForUser + " has started!");
-            int[] openedNodes = new int[n*n];
+            int[] openedNodes = new int[n*n*2];
             for (int t = 0; t < openedNodes.length; t++) {
                 openedNodes[t] = -1;
             }
             Percolation trial = new Percolation(n);
-            PercolationVisualizer.draw(trial, n);
-            StdDraw.show();
             for (int j = 0; j < openedNodes.length; j++) {
                 boolean alreadyOpen = true;
                 int row = -1, column = -1;
@@ -42,11 +36,7 @@ public class PercolationStats {
                 }
                 trial.open(row+1,  column+1);
                 addToOpenedNodes(openedNodes, row, column);
-                PercolationVisualizer.draw(trial, n);
-                StdDraw.show();
                 if (trial.percolates()) {
-                    int itemForUser = j + 1;
-                    System.out.println("Trial " + trialForUser + " percolates at the " + itemForUser + ". item.");
                     meanStats[meanIndex++] = (double) j / (n * n);
                     break;
                 }
@@ -106,7 +96,7 @@ public class PercolationStats {
 
     // test client (see below)
     public static void main(String[] args) {
-        PercolationStats stats = new PercolationStats(10, 100);
+        PercolationStats stats = new PercolationStats(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
         StdOut.println("Mean: " + stats.mean());
         StdOut.println("Simple standard deviation: " + stats.stddev());
         StdOut.println("Low end confidence interval: " + stats.confidenceLo());

@@ -70,12 +70,9 @@ public class Percolation {
         return false;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
+    // returns the number of open sites
+    public int numberOfOpenSites() {
+        return matrix.count();
     }
 
     public boolean percolates() {
