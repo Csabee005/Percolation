@@ -7,10 +7,11 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
-    private int size;
-    private WeightedQuickUnionUF matrix;
-    private int[][] matrixValues;
-    private boolean[][] matrixOpenings;
+    private final int size;
+    private final WeightedQuickUnionUF matrix;
+    private final int[][] matrixValues;
+    private final boolean[][] matrixOpenings;
+    private int openedNodes = 0;
 
     public Percolation(int size) {
         if (size <= 0) {
@@ -33,24 +34,39 @@ public class Percolation {
     }
 
     private boolean isMatrixPositionOpen(int row, int column) {
+        if (row < 0 || column < 0) {
+            throw new IllegalArgumentException("Row or column value must not be negative! Row: " + row + " column: " + column);
+        }
+        if (row >= size || column >= size) {
+            throw new IllegalArgumentException("Row or column value is too big! Row: " + row + " column: " + column);
+        }
         return matrixOpenings[row][column];
     }
 
     public void open(int row, int column) {
         row -= 1;
         column -= 1;
-        matrixOpenings[row][column] = true;
-        if (row + 1 < size && matrixOpenings[row + 1][column]) {
-            matrix.union(matrixValues[row][column], matrixValues[row + 1][column]);
+        if (row < 0 || column < 0) {
+            throw new IllegalArgumentException("Row or column value must not be negative! Row: " + row + " column: " + column);
         }
-        if (row - 1 >= 0 && matrixOpenings[row - 1][column]) {
-            matrix.union(matrixValues[row][column], matrixValues[row - 1][column]);
+        if (row >= size || column >= size) {
+            throw new IllegalArgumentException("Row or column value is too big! Row: " + row + " column: " + column);
         }
-        if (column + 1 < size && matrixOpenings[row][column + 1]) {
-            matrix.union(matrixValues[row][column], matrixValues[row][column + 1]);
-        }
-        if (column - 1 >= 0 && matrixOpenings[row][column - 1]) {
-            matrix.union(matrixValues[row][column], matrixValues[row][column - 1]);
+        if (!matrixOpenings[row][column]) {
+            openedNodes += 1;
+            matrixOpenings[row][column] = true;
+            if (row + 1 < size && matrixOpenings[row + 1][column]) {
+                matrix.union(matrixValues[row][column], matrixValues[row + 1][column]);
+            }
+            if (row - 1 >= 0 && matrixOpenings[row - 1][column]) {
+                matrix.union(matrixValues[row][column], matrixValues[row - 1][column]);
+            }
+            if (column + 1 < size && matrixOpenings[row][column + 1]) {
+                matrix.union(matrixValues[row][column], matrixValues[row][column + 1]);
+            }
+            if (column - 1 >= 0 && matrixOpenings[row][column - 1]) {
+                matrix.union(matrixValues[row][column], matrixValues[row][column - 1]);
+            }
         }
     }
 
@@ -58,6 +74,12 @@ public class Percolation {
         int columnNumber = 0;
         row -= 1;
         column -= 1;
+        if (row < 0 || column < 0) {
+            throw new IllegalArgumentException("Row or column value must not be negative! Row: " + row + " column: " + column);
+        }
+        if (row >= size || column >= size) {
+            throw new IllegalArgumentException("Row or column value is too big! Row: " + row + " column: " + column);
+        }
         if (row == 0 && matrixOpenings[row][column]) {
             return true;
         }
@@ -72,14 +94,22 @@ public class Percolation {
 
     // returns the number of open sites
     public int numberOfOpenSites() {
-        return matrix.count();
+        return openedNodes;
     }
 
     public boolean percolates() {
-        boolean percolates = false;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (matrixOpenings[size - 1][i] && matrixOpenings[0][j] && matrix.connected(matrixValues[size - 1][i], matrixValues[0][j])) {
+        int[] bottomConnections = new int[size];
+        int[] topConnections = new int[size];
+        for (int i = 0; i < bottomConnections.length; i++) {
+            bottomConnections[i] =  matrix.find((size * size) - bottomConnections.length + i);
+            topConnections[i] = matrix.find(i);
+            if (bottomConnections[i] == topConnections[i] && numberOfOpenSites() > 0) {
+                return true;
+            }
+        }
+        for (int i = 0; i < bottomConnections.length; i++) {
+            for (int j = 0; j < bottomConnections.length; j++) {
+                if (bottomConnections[i] == topConnections[j] && numberOfOpenSites() > 0) {
                     return true;
                 }
             }
